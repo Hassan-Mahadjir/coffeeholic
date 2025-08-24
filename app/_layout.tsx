@@ -36,8 +36,14 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack initialRouteName="welcome">
+      <Stack>
+        {/* Welcome flow */}
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
+
+        {/* Add your future main screens here */}
+        {/* <Stack.Screen name="home/index" options={{ headerShown: false }} /> */}
+
+        {/* Fallback */}
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

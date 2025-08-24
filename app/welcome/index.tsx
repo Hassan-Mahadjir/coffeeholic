@@ -5,6 +5,7 @@ import { StyleSheet } from "react-native";
 export default function WelcomeScreen() {
   return (
     <ThemedView style={styles.container}>
+      {/* <ThemedText>Welcome</ThemedText> */}
       <Onboarding />
     </ThemedView>
   );
