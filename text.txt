@@ -1,0 +1,257 @@
+import React from "react";
+import { Image, StyleSheet, useWindowDimensions, View } from "react-native";
+import { moderateScale, verticalScale } from "react-native-size-matters";
+import { ThemedText } from "./ThemedText";
+import { ThemedView } from "./ThemedView";
+
+type OnboardingItemProps = {
+  item: {
+    id: number;
+    title: string;
+    description: string;
+    image: any;
+  };
+  backgroundImage?: any;
+};
+
+const OnboardingItem = ({ item, backgroundImage }: OnboardingItemProps) => {
+  const { width, height } = useWindowDimensions();
+
+  return (
+    <ThemedView
+      style={{ width, height, justifyContent: "center", alignItems: "center" }}
+    >
+      {/* Blurred, semi-transparent background image */}
+      {backgroundImage && (
+        <Image
+          source={backgroundImage}
+          style={[
+            StyleSheet.absoluteFillObject,
+            { width, height, opacity: 0.3 },
+          ]}
+          resizeMode="cover"
+          blurRadius={20}
+        />
+      )}
+
+      {/* Main image with border radius */}
+      <View
+        style={{
+          width: width * 0.85,
+          height: height * 0.55,
+          borderRadius: 32,
+          overflow: "hidden",
+          alignSelf: "center",
+          marginTop: height * 0.12,
+          marginBottom: 5,
+          backgroundColor: "#fff1",
+        }}
+      >
+        <Image
+          source={item.image}
+          style={{ width: "100%", height: "100%" }}
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* Gradient overlay behind text */}
+      {/* <LinearGradient
+        colors={["transparent", "rgba(45, 27, 1, 0.9)"]}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 0, y: 0 }}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "45%",
+        }}
+      /> */}
+
+      {/* Text overlay */}
+      <View style={styles.textContainer}>
+        <ThemedText type="title" style={{ marginBottom: verticalScale(5) }}>
+          {item.title}
+        </ThemedText>
+        <ThemedText style={styles.description} type="default">
+          {item.description}
+        </ThemedText>
+      </View>
+    </ThemedView>
+  );
+};
+
+const styles = StyleSheet.create({
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: moderateScale(20),
+  },
+  description: {
+    textAlign: "center",
+  },
+});
+
+export default OnboardingItem;
+
+
+
+..........................................................................
+import slides from "@/data/onboardingSlides";
+import React, { useRef, useState } from "react";
+import {
+  Dimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  View,
+} from "react-native";
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
+import { scale, verticalScale } from "react-native-size-matters";
+import OnboardingItem from "./OnboardingItem";
+import { ThemedView } from "./ThemedView";
+
+const { width } = Dimensions.get("window");
+
+const Onboarding = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef(null);
+  const scrollX = useSharedValue(0);
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+
+  const handleMomentumScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / width);
+    setCurrentIndex(index);
+  };
+
+  return (
+    <ThemedView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <Animated.FlatList
+          ref={flatListRef}
+          data={slides}
+          renderItem={({ item, index }) => (
+            <AnimatedOnboardingItem
+              item={item}
+              index={index}
+              scrollX={scrollX}
+            />
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          horizontal
+          pagingEnabled
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+        />
+        {/* Pagination dots */}
+        <View style={styles.indicatorOverlay}>
+          {slides.map((_, idx) => (
+            <View
+              key={idx}
+              style={[styles.dot, currentIndex === idx && styles.activeDot]}
+            />
+          ))}
+        </View>
+      </View>
+    </ThemedView>
+  );
+};
+
+const styles = StyleSheet.create({
+  indicatorOverlay: {
+    position: "absolute",
+    bottom: verticalScale(50),
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10, // higher z-index
+    elevation: 10, // for Android
+  },
+  dot: {
+    width: scale(12),
+    height: verticalScale(8),
+    borderRadius: 5,
+    backgroundColor: "#eeeeeeff", // white for visibility
+    marginHorizontal: 6,
+    opacity: 0.8,
+    borderWidth: 1,
+    borderColor: "#888",
+  },
+  activeDot: {
+    backgroundColor: "#836c4ee6",
+    width: scale(25),
+    height: verticalScale(8),
+    borderRadius: 5,
+    opacity: 1,
+    borderWidth: 1,
+    borderColor: "rgba(68, 64, 45, 1)e6",
+  },
+});
+
+// Animated onboarding item wrapper
+import { useWindowDimensions } from "react-native";
+
+type AnimatedOnboardingItemProps = {
+  item: any;
+  index: number;
+  scrollX: Animated.SharedValue<number>;
+};
+
+const AnimatedOnboardingItem = ({
+  item,
+  index,
+  scrollX,
+}: AnimatedOnboardingItemProps) => {
+  const { width } = useWindowDimensions();
+  const animatedStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      (index - 1) * width,
+      index * width,
+      (index + 1) * width,
+    ];
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.85, 1, 0.85],
+      Extrapolate.CLAMP
+    );
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.5, 1, 0.5],
+      Extrapolate.CLAMP
+    );
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  });
+  // Pass the indexed image as backgroundImage for reflection
+  return (
+    <Animated.View style={[{ width }, animatedStyle]}>
+      <OnboardingItem item={item} backgroundImage={item.image} />
+    </Animated.View>
+  );
+};
+
+export default Onboarding;

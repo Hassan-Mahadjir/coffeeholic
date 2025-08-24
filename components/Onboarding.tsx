@@ -30,7 +30,13 @@ const Onboarding = () => {
         <FlatList
           ref={flatListRef}
           data={slides}
-          renderItem={({ item }) => <OnboardingItem item={item} />}
+          renderItem={({ item, index }) => (
+            <OnboardingItem
+              item={item}
+              index={currentIndex}
+              itemIndex={index}
+            />
+          )}
           keyExtractor={(item) => item.id.toString()}
           horizontal
           pagingEnabled
@@ -38,6 +44,9 @@ const Onboarding = () => {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          decelerationRate="fast"
+          snapToInterval={width}
+          snapToAlignment="center"
         />
         {/* Pagination dots */}
         <View style={styles.indicatorOverlay}>
@@ -70,7 +79,7 @@ const styles = StyleSheet.create({
     height: verticalScale(8),
     borderRadius: 5,
     backgroundColor: "#eeeeeeff", // white for visibility
-    marginHorizontal: 6,
+    marginHorizontal: scale(2),
     opacity: 0.8,
     borderWidth: 1,
     borderColor: "#888",
