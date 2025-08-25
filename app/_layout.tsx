@@ -41,7 +41,7 @@ export default function RootLayout() {
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
 
         {/* Add your future main screens here */}
-        {/* <Stack.Screen name="home/index" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
 
         {/* Fallback */}
         <Stack.Screen name="+not-found" />
