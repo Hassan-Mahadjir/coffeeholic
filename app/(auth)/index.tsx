@@ -1,7 +1,10 @@
 import CustomInputComponent from "@/components/CustomInput";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Feather } from "@expo/vector-icons";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { loginFormValues } from "@/types/auth";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
@@ -9,17 +12,32 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { scale, verticalScale } from "react-native-size-matters";
+import { z } from "zod";
 
 export default function LoginScreen() {
+  const textColor = useThemeColor({}, "text");
+  const borderColor = useThemeColor({}, "text");
+
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
-  const methods = useForm({
-    defaultValues: { email: "", password: "" },
+
+  const formSchema = z.object({
+    email: z.email(),
+    password: z.string().min(6),
   });
 
-  const onSubmit = (data: any) => {
+  const methods = useForm<loginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = (data: loginFormValues) => {
     // Handle login logic here
     console.log("login form: ", data);
   };
@@ -61,23 +79,36 @@ export default function LoginScreen() {
             Login
           </ThemedText>
         </TouchableOpacity>
-        <ThemedText style={{ marginVertical: verticalScale(10) }}>
-          Or login with
-        </ThemedText>
+
+        <View style={styles.horizontalLineContainer}>
+          <View
+            style={[styles.horizontalLine, { backgroundColor: textColor }]}
+          />
+          <ThemedText type="default" style={{ marginHorizontal: scale(10) }}>
+            or login with
+          </ThemedText>
+          <View
+            style={[styles.horizontalLine, { backgroundColor: textColor }]}
+          />
+        </View>
+
         <TouchableOpacity
-          style={styles.socialButton}
+          style={[styles.socialButton, { borderColor: borderColor }]}
           onPress={handleGoogleLogin}
         >
-          <Feather name="user" size={24} color="#4285F4" />
-          <ThemedText style={{ marginLeft: 8 }}>Google</ThemedText>
+          <AntDesign name="google" size={24} color={textColor} />
+          <ThemedText style={{ marginLeft: 8 }}>Sing in with Google</ThemedText>
         </TouchableOpacity>
+
         {Platform.OS === "ios" && (
           <TouchableOpacity
-            style={styles.socialButton}
+            style={[styles.socialButton, { borderColor: borderColor }]}
             onPress={handleAppleLogin}
           >
-            <Feather name="lock" size={24} color="#000" />
-            <ThemedText style={{ marginLeft: 8 }}>Apple</ThemedText>
+            <AntDesign name="apple1" size={24} color={textColor} />
+            <ThemedText style={{ marginLeft: 8 }}>
+              Sign in with Apple
+            </ThemedText>
           </TouchableOpacity>
         )}
       </ThemedView>
@@ -103,12 +134,22 @@ const styles = StyleSheet.create({
   socialButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
     paddingVertical: verticalScale(10),
     paddingHorizontal: scale(24),
     borderRadius: scale(20),
+    borderWidth: 1,
     marginTop: verticalScale(8),
     width: "100%",
     justifyContent: "center",
+  },
+  horizontalLineContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginVertical: scale(15),
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1,
   },
 });
