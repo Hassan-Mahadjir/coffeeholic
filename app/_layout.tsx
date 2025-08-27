@@ -40,8 +40,10 @@ export default function RootLayout() {
         {/* Welcome flow */}
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
 
-        {/* Add your future main screens here */}
+        {/*  main screens here */}
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        {/* Tabs  */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
         {/* Fallback */}
         <Stack.Screen name="+not-found" />
