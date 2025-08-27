@@ -13,7 +13,7 @@ type CustomInputProps = TextInputProps & {
     | "text"
     | "password"
     | "email"
-    | "firstName"
+    | "name"
     | "lastName"
     | "confirmPassword";
   rules?: any;
@@ -39,7 +39,7 @@ const CustomInputComponent = forwardRef<TextInput, CustomInputProps>(
           return "********";
         case "email":
           return "example@gmail.com";
-        case "firstName":
+        case "name":
           return "e.g Hassan";
         case "lastName":
           return "e.g Barakat";

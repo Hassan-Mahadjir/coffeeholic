@@ -2,7 +2,6 @@ import CustomInputComponent from "@/components/CustomInput";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { loginFormValues } from "@/types/auth";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
@@ -20,44 +19,57 @@ import {
 import { scale, verticalScale } from "react-native-size-matters";
 import { z } from "zod";
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const router = useRouter();
   const textColor = useThemeColor({}, "text");
   const borderColor = useThemeColor({}, "text");
 
+  const nameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
-  const formSchema = z.object({
-    email: z.email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-  });
+  const formSchema = z
+    .object({
+      name: z.string().min(2, "Name is required"),
+      email: z.email("Invalid email address"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+      confirmPassword: z.string().min(6, "Confirm your password"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    });
 
-  const methods = useForm<loginFormValues>({
+  const methods = useForm({
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: loginFormValues) => {
-    // Handle login logic here
-    console.log("login form: ", data);
+  const onSubmit = (data: any) => {
+    // Handle signup logic here
+    console.log("signup form: ", data);
   };
 
-  const handleGoogleLogin = () => {
-    // Handle Google login logic here
+  const handleGoogleSignup = () => {
+    // Handle Google signup logic here
   };
 
-  const handleAppleLogin = () => {
-    // Handle Apple login logic here
+  const handleAppleSignup = () => {
+    // Handle Apple signup logic here
   };
 
   const isFormValid =
     methods.formState.isValid &&
+    methods.watch("name") &&
     methods.watch("email") &&
-    methods.watch("password");
+    methods.watch("password") &&
+    methods.watch("confirmPassword");
   return (
     <FormProvider {...methods}>
       <TouchableWithoutFeedback
@@ -70,11 +82,19 @@ export default function LoginScreen() {
             style={{
               marginBottom: verticalScale(10),
               textAlign: "center",
-              top: verticalScale(-40),
+              top: verticalScale(-10),
             }}
           >
-            Welcome
+            Create Account
           </ThemedText>
+          <CustomInputComponent
+            name="name"
+            text="Name"
+            inputType="name"
+            returnKeyType="next"
+            ref={nameRef}
+            onSubmitEditing={() => emailRef.current?.focus()}
+          />
           <CustomInputComponent
             name="email"
             text="Email"
@@ -87,66 +107,83 @@ export default function LoginScreen() {
             name="password"
             text="Password"
             inputType="password"
-            returnKeyType="done"
+            returnKeyType="next"
             ref={passwordRef}
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+          />
+          <CustomInputComponent
+            name="confirmPassword"
+            text="Confirm Password"
+            inputType="password"
+            returnKeyType="done"
+            ref={confirmPasswordRef}
           />
           <TouchableOpacity
-            style={[styles.loginButton, { opacity: isFormValid ? 1 : 0.5 }]}
+            style={[styles.signupButton, { opacity: isFormValid ? 1 : 0.5 }]}
             onPress={methods.handleSubmit(onSubmit)}
             disabled={!isFormValid}
           >
             <ThemedText type="defaultSemiBold" style={{ color: "#fff" }}>
-              Login
+              Sign Up
             </ThemedText>
           </TouchableOpacity>
-
-          <View style={styles.horizontalLineContainer}>
+          <View style={{ marginVertical: verticalScale(16) }}>
             <View
-              style={[styles.horizontalLine, { backgroundColor: textColor }]}
-            />
-            <ThemedText type="default" style={{ marginHorizontal: scale(10) }}>
-              or login with
-            </ThemedText>
-            <View
-              style={[styles.horizontalLine, { backgroundColor: textColor }]}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.socialButton, { borderColor: borderColor }]}
-            onPress={handleGoogleLogin}
-          >
-            <AntDesign name="google" size={24} color={textColor} />
-            <ThemedText style={{ marginLeft: 8 }}>
-              Sing in with Google
-            </ThemedText>
-          </TouchableOpacity>
-
-          {Platform.OS === "ios" && (
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                width: "100%",
+                marginVertical: scale(15),
+              }}
+            >
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: textColor }}
+              />
+              <ThemedText
+                type="default"
+                style={{ marginHorizontal: scale(10) }}
+              >
+                or sign up with
+              </ThemedText>
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: textColor }}
+              />
+            </View>
             <TouchableOpacity
               style={[styles.socialButton, { borderColor: borderColor }]}
-              onPress={handleAppleLogin}
+              onPress={handleGoogleSignup}
             >
-              <AntDesign name="apple1" size={24} color={textColor} />
+              <AntDesign name="google" size={24} color={textColor} />
               <ThemedText style={{ marginLeft: 8 }}>
-                Sign in with Apple
+                Sign up with Google
               </ThemedText>
             </TouchableOpacity>
-          )}
+            {Platform.OS === "ios" && (
+              <TouchableOpacity
+                style={[styles.socialButton, { borderColor: borderColor }]}
+                onPress={handleAppleSignup}
+              >
+                <AntDesign name="apple1" size={24} color={textColor} />
+                <ThemedText style={{ marginLeft: 8 }}>
+                  Sign up with Apple
+                </ThemedText>
+              </TouchableOpacity>
+            )}
+          </View>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "center",
-              marginVertical: verticalScale(16),
+              marginVertical: verticalScale(5),
             }}
           >
-            <ThemedText type="default">Don't have an account? </ThemedText>
+            <ThemedText type="default">Do you have an account? </ThemedText>
             <ThemedText
               type="link"
               style={{ color: "#836c4ee6", marginTop: verticalScale(-2) }}
-              onPress={() => router.replace("/(auth)/signup")}
+              onPress={() => router.replace("/(auth)")}
             >
-              Signup
+              Login
             </ThemedText>
           </View>
         </ThemedView>
@@ -161,7 +198,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: scale(16),
   },
-  loginButton: {
+  signupButton: {
     backgroundColor: "#836c4ee6",
     paddingVertical: verticalScale(12),
     paddingHorizontal: scale(32),
@@ -180,15 +217,5 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(8),
     width: "100%",
     justifyContent: "center",
-  },
-  horizontalLineContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginVertical: scale(15),
-  },
-  horizontalLine: {
-    flex: 1,
-    height: 1,
   },
 });
