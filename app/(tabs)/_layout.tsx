@@ -1,3 +1,4 @@
+import TabBar from "@/components/TabBar";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Octicons } from "@expo/vector-icons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -20,9 +21,10 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: tabDefault,
         tabBarStyle: { backgroundColor: useTheme().colors.card },
       }}
+      tabBar={(props) => <TabBar {...props} />}
     >
       <Tabs.Screen
-        name="home"
+        name="index"
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => (
@@ -33,7 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="suggestions"
         options={{
-          tabBarLabel: "Suggestions",
+          tabBarLabel: "Suggestion",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons
               name="smart-toy"
@@ -69,7 +71,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen name="index" options={{ href: null }} />
     </Tabs>
   );
 }
