@@ -1,5 +1,6 @@
 import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
 import { scale, verticalScale } from "react-native-size-matters";
+import { ThemedText } from "../ThemedText";
 import { SliderProps } from "./RecommondationSlider";
 
 // Render Items to FlatList
@@ -39,13 +40,17 @@ const RecommondationItem = ({ item }: { item: SliderProps }) => {
         </ImageBackground> */}
       <Image
         source={require("../../assets/images/recommadation-bg.jpg")}
-        style={{
-          width: screenWidth,
-          height: verticalScale(150),
-          borderRadius: scale(10),
-          marginTop: scale(10),
-        }}
+        style={[styles.backgroundImage, { width: screenWidth }]}
       />
+      <View style={[styles.innerContainer, { width: screenWidth }]}>
+        <ThemedText type="subtitle" style={styles.description}>
+          {item.description}
+        </ThemedText>
+        <Image
+          source={require("../../assets/images/coffee-1.webp")}
+          style={styles.coffeeImage}
+        />
+      </View>
     </View>
     // </TouchableOpacity>
   );
@@ -54,20 +59,29 @@ const RecommondationItem = ({ item }: { item: SliderProps }) => {
 export default RecommondationItem;
 
 const styles = StyleSheet.create({
-  linearGradientStyle: {
+  innerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    left: scale(20),
+    top: verticalScale(30),
+  },
+  backgroundImage: {
+    height: verticalScale(150),
     borderRadius: scale(10),
+    marginTop: scale(10),
+  },
+  coffeeImage: {
+    right: scale(20),
+    top: verticalScale(-25),
+    position: "absolute",
+    width: scale(175),
+    height: scale(175),
   },
   description: {
-    position: "absolute",
-    top: verticalScale(120),
-    marginLeft: scale(10),
-    fontWeight: "bold",
     color: "#fff",
-    width: "80%",
+    fontWeight: "bold",
+    width: "50%",
   },
 });
