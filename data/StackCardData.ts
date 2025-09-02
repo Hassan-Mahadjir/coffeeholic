@@ -14,4 +14,9 @@ export const data = [
     image: require("@/assets/images/card-1.jpg"),
     title: "Card 3",
   },
+  {
+    id: 4,
+    image: require("@/assets/images/card-1.jpg"),
+    title: "Card 3",
+  },
 ];
