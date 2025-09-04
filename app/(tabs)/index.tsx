@@ -1,7 +1,8 @@
 import Carousel from "@/components/home/Carousel";
 import RecommondationSlider from "@/components/home/RecommondationSlider";
+import { router } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { scale, verticalScale } from "react-native-size-matters";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
@@ -20,12 +21,23 @@ const HomeIndex = () => {
           Recommended for you
         </ThemedText>
         <RecommondationSlider />
-        <ThemedText
-          type="subtitle"
-          style={{ marginLeft: scale(10), marginTop: 10 }}
+        <View
+          style={{
+            marginLeft: scale(10),
+            marginHorizontal: scale(10),
+            marginTop: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
         >
-          Most poplar coffees
-        </ThemedText>
+          <ThemedText type="subtitle" style={{}}>
+            Most poplar coffees
+          </ThemedText>
+          <Pressable onPress={() => router.push("/all-coffees")}>
+            <ThemedText type="link">See All</ThemedText>
+          </Pressable>
+        </View>
+
         <Carousel />
       </View>
     </ThemedView>

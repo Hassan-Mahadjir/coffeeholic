@@ -44,6 +44,8 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         {/* Tabs  */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {/* All coffees */}
+        <Stack.Screen name="all-coffees" options={{ headerShown: false }} />
 
         {/* Fallback */}
         <Stack.Screen name="+not-found" />
