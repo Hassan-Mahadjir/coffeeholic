@@ -5,10 +5,14 @@ import { ThemedView } from "@/components/ThemedView";
 import { coffeesData } from "@/data/coffeesData";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Dimensions,
   FlatList,
   Keyboard,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
@@ -20,6 +24,53 @@ const ExploreIndex = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [filteredCoffees, setFilteredCoffees] = useState(coffeesData);
+
+  // Animated values for header subtitle and search bar visibility
+  const headerAnim = useRef(new Animated.Value(1)).current; // 1 = shown, 0 = hidden
+  const searchAnim = useRef(new Animated.Value(1)).current; // 1 = shown, 0 = hidden
+  const categoryMarginAnim = useRef(new Animated.Value(0)).current; // 0 = normal, negative = moved up
+  const lastOffsetYRef = useRef(0);
+  const isAnimatingRef = useRef(false);
+  const isShownRef = useRef(true);
+  const screenHeight = useRef(Dimensions.get("window").height).current;
+  const thresholdY = screenHeight * 0.1;
+
+  const animateVisibility = (show: boolean) => {
+    if (isShownRef.current === show) return;
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+    Animated.parallel([
+      Animated.timing(headerAnim, {
+        toValue: show ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(searchAnim, {
+        toValue: show ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(categoryMarginAnim, {
+        toValue: show ? 0 : -verticalScale(80), // Move up by ~80px when hidden
+        duration: 500,
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      isAnimatingRef.current = false;
+      isShownRef.current = show;
+    });
+  };
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const currentY = e.nativeEvent.contentOffset.y;
+    // Toggle visibility based on 20% screen height threshold
+    if (currentY > thresholdY) {
+      animateVisibility(false);
+    } else {
+      animateVisibility(true);
+    }
+    lastOffsetYRef.current = currentY;
+  };
 
   const textColor = useThemeColor({}, "text");
   const backgroundColor = useThemeColor({}, "background");
@@ -59,30 +110,67 @@ const ExploreIndex = () => {
           <ThemedText type="title" style={styles.headerTitle}>
             All Coffees
           </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
-            Discover our premium coffee collection
-          </ThemedText>
+          <Animated.View
+            style={{
+              opacity: headerAnim,
+              transform: [
+                {
+                  translateY: headerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-8, 0],
+                  }),
+                },
+              ],
+            }}
+          >
+            <ThemedText style={styles.headerSubtitle}>
+              Discover our premium coffee collection
+            </ThemedText>
+          </Animated.View>
         </View>
 
         {/* Search Bar */}
-        <View style={[styles.searchContainer, { backgroundColor: "#f0f0f0" }]}>
-          <Ionicons
-            name="search"
-            size={20}
-            color={textColor}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={[styles.searchInput, { color: textColor }]}
-            placeholder="Search coffees..."
-            placeholderTextColor={textColor + "80"}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
+        <Animated.View
+          style={{
+            opacity: searchAnim,
+            transform: [
+              {
+                translateY: searchAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-10, 0],
+                }),
+              },
+            ],
+          }}
+        >
+          <View
+            style={[styles.searchContainer, { backgroundColor: "#f0f0f0" }]}
+          >
+            <Ionicons
+              name="search"
+              size={20}
+              color={textColor}
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={[styles.searchInput, { color: textColor }]}
+              placeholder="Search coffees..."
+              placeholderTextColor={textColor + "80"}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </Animated.View>
 
         {/* Category Filter */}
-        <View style={styles.categoriesContainer}>
+        <Animated.View
+          style={[
+            styles.categoriesContainer,
+            {
+              marginTop: categoryMarginAnim,
+            },
+          ]}
+        >
           <FlatList
             data={categories}
             renderItem={({ item }) => (
@@ -98,7 +186,7 @@ const ExploreIndex = () => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.categoriesList}
           />
-        </View>
+        </Animated.View>
 
         {/* Results Count */}
         <ThemedText style={styles.resultsCount}>
@@ -115,6 +203,8 @@ const ExploreIndex = () => {
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.coffeesList}
           showsVerticalScrollIndicator={false}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
         />
       </ThemedView>
     </TouchableWithoutFeedback>

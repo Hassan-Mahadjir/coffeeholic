@@ -1,11 +1,21 @@
 import { Coffee } from "@/data/coffeesData";
+import { useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { moderateScale, scale, verticalScale } from "react-native-size-matters";
 import { ThemedText } from "../ThemedText";
 
 const CoffeeItem = ({ item }: { item: Coffee }) => {
+  const router = useRouter();
+
+  const handlePress = () => {
+    router.push({
+      pathname: "/[id]",
+      params: { id: item.id.toString() },
+    });
+  };
+
   return (
-    <Pressable style={styles.coffeeCard}>
+    <Pressable style={styles.coffeeCard} onPress={handlePress}>
       <View style={{ position: "relative", alignItems: "center" }}>
         <View style={styles.imageBackground} />
         <Image source={item.image} style={styles.coffeeImage} />
